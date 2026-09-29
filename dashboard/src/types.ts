@@ -1,0 +1,5 @@
+export type Project = { id:number; name:string; description:string; created_at:string; spec_info?: {title:string;version:string;openapi:string;operation_count:number}|null };
+export type Scan = { id:number; project_id:number; project_name?:string|null; base_url:string; status:string; profile:string; progress:number; config:Record<string,unknown>; stats:Record<string,any>; error:string; created_at:string; started_at?:string|null; finished_at?:string|null };
+export type Finding = { id:number; scan_id:number; severity:string; confidence:string; category:string; title:string; description:string; endpoint:string; method:string; evidence:Record<string,unknown>; remediation:string; owasp:string; created_at:string };
+export type Operation = { method:string; path:string; summary:string; tags:string[]; security_required:boolean; parameters:Array<Record<string,any>>; has_request_body:boolean };
+export type Overview = { projects:number; scans:number; findings:number; severity:Record<string,number>; recent_scans:Scan[] };
