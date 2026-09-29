@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: API Auditor Local Demo Target
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:9000
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+paths:
+  /health:
+    get:
+      summary: Demo health endpoint
+      responses:
+        '200': {description: OK}
+  /account:
+    get:
+      summary: Get current authenticated account
+      security: [{BearerAuth: []}]
+      responses:
+        '200': {description: Current account}
+  /users/{user_id}:
+    get:
+      summary: Get a user by object identifier
+      security: [{BearerAuth: []}]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema: {type: integer, example: 1}
+      responses:
+        '200': {description: User object}
+  /debug/leak:
+    get:
+      summary: Intentionally leaky demo response
+      security: [{BearerAuth: []}]
+      responses:
+        '200': {description: Debug response}
+  /search:
+    get:
+      summary: Search demo records
+      parameters:
+        - name: limit
+          in: query
+          schema: {type: integer, default: 10}
+        - name: q
+          in: query
+          schema: {type: string, default: sample}
+      responses:
+        '200': {description: Results}
