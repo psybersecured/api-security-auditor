@@ -1,0 +1,83 @@
+{
+  "generated_at": "2026-09-29T07:47:09.782250+00:00",
+  "target": "http://127.0.0.1:9000",
+  "spec": {
+    "title": "API Auditor Local Demo Target",
+    "version": "1.0.0",
+    "openapi": "3.0.3",
+    "operation_count": 5
+  },
+  "scope": {
+    "allowed_hosts": [],
+    "allow_write_methods": false,
+    "requests_per_second": 2.0,
+    "max_requests": 250
+  },
+  "summary": {
+    "endpoints_discovered": 5,
+    "endpoints_scanned": 5,
+    "endpoints_skipped": 0,
+    "requests_sent": 18,
+    "findings": 3,
+    "severity_counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 0,
+      "info": 1
+    }
+  },
+  "findings": [
+    {
+      "severity": "info",
+      "confidence": "low",
+      "category": "resource_controls",
+      "title": "No common rate-limit headers observed",
+      "description": "The sampled response did not expose common rate-limit metadata. This does not prove rate limiting is absent; server-side enforcement may be opaque.",
+      "endpoint": "/health",
+      "method": "GET",
+      "evidence": {
+        "status": 200
+      },
+      "remediation": "Verify that abuse controls and quotas are enforced server-side for expensive or sensitive operations.",
+      "owasp": "API4:2023 Unrestricted Resource Consumption"
+    },
+    {
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "authorization",
+      "title": "Potential broken object-level authorization (BOLA)",
+      "description": "An operator-supplied alternate object identifier returned a successful response. This is a heuristic finding and must be validated against the intended ownership/role model.",
+      "endpoint": "/users/{user_id}",
+      "method": "GET",
+      "evidence": {
+        "parameter": "user_id",
+        "alternate_value": "2",
+        "baseline_status": 200,
+        "alternate_status": 200,
+        "baseline_preview": "{\"id\":1,\"name\":\"Demo Alice\",\"email\":\"alice@example.test\",\"plan\":\"student\"}",
+        "alternate_preview": "{\"id\":2,\"name\":\"Demo Bob\",\"email\":\"bob@example.test\",\"plan\":\"admin\"}"
+      },
+      "remediation": "Enforce object ownership/tenant authorization server-side for every object lookup, independent of client-supplied identifiers.",
+      "owasp": "API1:2023 Broken Object Level Authorization"
+    },
+    {
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "data_exposure",
+      "title": "Potential sensitive fields exposed in API response",
+      "description": "The successful response contains field names commonly associated with secrets or sensitive data. Review whether these fields are required for this client and role.",
+      "endpoint": "/debug/leak",
+      "method": "GET",
+      "evidence": {
+        "status": 200,
+        "sensitive_fields": [
+          "internal_api_key"
+        ]
+      },
+      "remediation": "Apply response allowlists/DTOs, remove unnecessary sensitive fields, and enforce least-privilege data serialization.",
+      "owasp": "API3:2023 Broken Object Property Level Authorization"
+    }
+  ],
+  "disclaimer": "Automated findings are heuristics and require human validation. Test only systems you own or are explicitly authorized to assess."
+}

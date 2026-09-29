@@ -1,0 +1,55 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>API Security Audit Report</title>
+<style>
+:root{--bg:#07101f;--panel:#0d1930;--line:#1b3156;--text:#e8f0ff;--muted:#93a5c7;--accent:#6aa6ff}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#07101f,#0a1223);color:var(--text);font:15px/1.5 Inter,Segoe UI,sans-serif}
+main{max-width:1120px;margin:auto;padding:40px 24px 80px} h1{font-size:34px;margin:6px 0} .eyebrow{color:#73b3ff;text-transform:uppercase;letter-spacing:.14em;font-size:12px}
+.meta,.owasp{color:var(--muted)} .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:28px 0} .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;justify-content:space-between} .card span{font-size:26px}
+.finding{background:var(--panel);border:1px solid var(--line);border-left:5px solid #7387a9;border-radius:14px;padding:20px;margin:16px 0} .finding.high{border-left-color:#ff6379} .finding.medium{border-left-color:#ffb454} .finding.low{border-left-color:#74b9ff} .finding.critical{border-left-color:#ff3454} .finding.info{border-left-color:#8e9db7}
+.finding-head{display:flex;align-items:center;gap:12px} .finding-head h3{margin:0} .badge{font-size:11px;border:1px solid #38517c;padding:4px 8px;border-radius:999px} pre{white-space:pre-wrap;overflow:auto;background:#06101e;border-radius:10px;padding:14px} details{margin:12px 0} .notice{background:#0c2745;border:1px solid #1f5d96;border-radius:12px;padding:14px}
+</style></head><body><main>
+<p class="eyebrow">Automated API Security Auditor</p><h1>Security Audit Report</h1>
+<p class="meta">Target: http://127.0.0.1:9000<br>Generated: 2026-09-29T07:47:09.782250+00:00</p>
+<div class="cards"><div class='card'><b>Critical</b><span>0</span></div><div class='card'><b>High</b><span>0</span></div><div class='card'><b>Medium</b><span>2</span></div><div class='card'><b>Low</b><span>0</span></div><div class='card'><b>Info</b><span>1</span></div></div>
+<p class="notice">Automated findings are heuristics and require human validation. Test only systems you own or are explicitly authorized to assess.</p>
+<section>
+        <article class="finding info">
+          <div class="finding-head"><span class="badge">INFO</span><h3>No common rate-limit headers observed</h3></div>
+          <p class="meta">GET /health · confidence low</p>
+          <p>The sampled response did not expose common rate-limit metadata. This does not prove rate limiting is absent; server-side enforcement may be opaque.</p>
+          <details><summary>Evidence</summary><pre>{
+  &quot;status&quot;: 200
+}</pre></details>
+          <p><strong>Remediation:</strong> Verify that abuse controls and quotas are enforced server-side for expensive or sensitive operations.</p>
+          <p class="owasp">API4:2023 Unrestricted Resource Consumption</p>
+        </article>
+        <article class="finding medium">
+          <div class="finding-head"><span class="badge">MEDIUM</span><h3>Potential broken object-level authorization (BOLA)</h3></div>
+          <p class="meta">GET /users/{user_id} · confidence medium</p>
+          <p>An operator-supplied alternate object identifier returned a successful response. This is a heuristic finding and must be validated against the intended ownership/role model.</p>
+          <details><summary>Evidence</summary><pre>{
+  &quot;parameter&quot;: &quot;user_id&quot;,
+  &quot;alternate_value&quot;: &quot;2&quot;,
+  &quot;baseline_status&quot;: 200,
+  &quot;alternate_status&quot;: 200,
+  &quot;baseline_preview&quot;: &quot;{\&quot;id\&quot;:1,\&quot;name\&quot;:\&quot;Demo Alice\&quot;,\&quot;email\&quot;:\&quot;alice@example.test\&quot;,\&quot;plan\&quot;:\&quot;student\&quot;}&quot;,
+  &quot;alternate_preview&quot;: &quot;{\&quot;id\&quot;:2,\&quot;name\&quot;:\&quot;Demo Bob\&quot;,\&quot;email\&quot;:\&quot;bob@example.test\&quot;,\&quot;plan\&quot;:\&quot;admin\&quot;}&quot;
+}</pre></details>
+          <p><strong>Remediation:</strong> Enforce object ownership/tenant authorization server-side for every object lookup, independent of client-supplied identifiers.</p>
+          <p class="owasp">API1:2023 Broken Object Level Authorization</p>
+        </article>
+        <article class="finding medium">
+          <div class="finding-head"><span class="badge">MEDIUM</span><h3>Potential sensitive fields exposed in API response</h3></div>
+          <p class="meta">GET /debug/leak · confidence medium</p>
+          <p>The successful response contains field names commonly associated with secrets or sensitive data. Review whether these fields are required for this client and role.</p>
+          <details><summary>Evidence</summary><pre>{
+  &quot;status&quot;: 200,
+  &quot;sensitive_fields&quot;: [
+    &quot;internal_api_key&quot;
+  ]
+}</pre></details>
+          <p><strong>Remediation:</strong> Apply response allowlists/DTOs, remove unnecessary sensitive fields, and enforce least-privilege data serialization.</p>
+          <p class="owasp">API3:2023 Broken Object Property Level Authorization</p>
+        </article></section>
+</main></body></html>
