@@ -1,0 +1,34 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    environment:
+      AUDITOR_DATABASE_URL: sqlite:////data/auditor.db
+      AUDITOR_CORS_ORIGINS: http://localhost:5173
+    volumes:
+      - auditor_data:/data
+    ports:
+      - "8000:8000"
+
+  dashboard:
+    build:
+      context: dashboard
+      dockerfile: ../docker/dashboard.Dockerfile
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  demo-target:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    command: ["uvicorn", "demo_target.app:app", "--host", "0.0.0.0", "--port", "9000"]
+    ports:
+      - "127.0.0.1:9000:9000"
+
+volumes:
+  auditor_data:
